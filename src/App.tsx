@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
+import LiveAnalysis from './components/LiveAnalysis';
 import NetworkMonitor from './components/NetworkMonitor';
 import ThreatDetection from './components/ThreatDetection';
 import AlertManager from './components/AlertManager';
@@ -8,12 +9,14 @@ import LogViewer from './components/LogViewer';
 import DetectionRules from './components/DetectionRules';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('live');
 
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
         return <Dashboard />;
+      case 'live':
+        return <LiveAnalysis />;
       case 'network':
         return <NetworkMonitor />;
       case 'threats':
@@ -25,7 +28,7 @@ export default function App() {
       case 'rules':
         return <DetectionRules />;
       default:
-        return <Dashboard />;
+        return <LiveAnalysis />;
     }
   };
 
