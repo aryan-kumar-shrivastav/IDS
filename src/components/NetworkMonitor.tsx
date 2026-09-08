@@ -153,25 +153,112 @@ export default function NetworkMonitor() {
         </div>
       </div>
 
-      {/* Packet Detail Modal */}
+      {/* Packet Detail Modal - Deep Inspection */}
       {selectedPacket && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50" onClick={() => setSelectedPacket(null)}>
-          <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 w-full max-w-lg mx-4" onClick={e => e.stopPropagation()}>
-            <h3 className="text-white font-semibold text-lg mb-4">Packet Details - {selectedPacket.id}</h3>
-            <div className="space-y-3">
-              {Object.entries(selectedPacket).map(([key, value]) => (
-                <div key={key} className="flex justify-between items-center py-2 border-b border-gray-700/50">
-                  <span className="text-gray-400 text-sm capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                  <span className="text-white text-sm font-mono">{String(value)}</span>
-                </div>
-              ))}
+          <div className="bg-gray-800 border border-gray-700 rounded-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-auto" onClick={e => e.stopPropagation()}>
+            <div className="p-6 border-b border-gray-700">
+              <h3 className="text-white font-semibold text-lg">Deep Packet Inspection - {selectedPacket.id}</h3>
+              <p className="text-gray-400 text-sm mt-1">Analysis results for captured packet</p>
             </div>
-            <button
-              onClick={() => setSelectedPacket(null)}
-              className="mt-4 w-full py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm"
-            >
-              Close
-            </button>
+            <div className="p-6 space-y-5">
+              {/* Packet Header Info */}
+              <div>
+                <h4 className="text-emerald-400 text-sm font-medium mb-3 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
+                  Packet Header
+                </h4>
+                <div className="grid grid-cols-2 gap-3 bg-gray-900 rounded-lg p-4">
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">Source IP</span><span className="text-green-400 text-xs font-mono">{selectedPacket.sourceIP}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">Dest IP</span><span className="text-blue-400 text-xs font-mono">{selectedPacket.destIP}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">Protocol</span><span className="text-purple-400 text-xs">{selectedPacket.protocol}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">Port</span><span className="text-white text-xs">{selectedPacket.port}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">Size</span><span className="text-white text-xs">{selectedPacket.size} bytes</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">Flags</span><span className="text-amber-400 text-xs font-mono">{selectedPacket.flags}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">TTL</span><span className="text-white text-xs">{Math.floor(Math.random() * 128) + 1}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500 text-xs">Checksum</span><span className="text-gray-300 text-xs font-mono">0x{Math.floor(Math.random() * 65535).toString(16).padStart(4, '0')}</span></div>
+                </div>
+              </div>
+
+              {/* Analysis Performed */}
+              <div>
+                <h4 className="text-emerald-400 text-sm font-medium mb-3 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
+                  Analysis Performed
+                </h4>
+                <div className="space-y-2">
+                  {[
+                    { engine: 'Signature Engine', result: selectedPacket.status === 'malicious' ? 'Match found' : 'No match', status: selectedPacket.status === 'malicious' ? 'threat' : 'clean' },
+                    { engine: 'Protocol Analyzer', result: selectedPacket.protocol + ' valid', status: 'clean' },
+                    { engine: 'Anomaly Detection', result: selectedPacket.status === 'suspicious' ? 'Deviation detected' : 'Within baseline', status: selectedPacket.status === 'suspicious' ? 'suspicious' : 'clean' },
+                    { engine: 'Threat Intelligence', result: selectedPacket.status === 'malicious' ? 'Known malicious IP' : 'Clean reputation', status: selectedPacket.status === 'malicious' ? 'threat' : 'clean' },
+                    { engine: 'Behavioral AI', result: selectedPacket.status !== 'normal' ? 'Anomalous pattern' : 'Normal behavior', status: selectedPacket.status !== 'normal' ? 'suspicious' : 'clean' },
+                    { engine: 'Payload Inspector', result: selectedPacket.size > 1000 ? 'Large payload flagged' : 'Payload clean', status: selectedPacket.size > 1000 ? 'suspicious' : 'clean' },
+                  ].map((analysis, i) => (
+                    <div key={i} className="flex items-center justify-between bg-gray-900/50 rounded-lg px-3 py-2">
+                      <span className="text-gray-300 text-xs">{analysis.engine}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-400 text-xs">{analysis.result}</span>
+                        <span className={`w-2 h-2 rounded-full ${
+                          analysis.status === 'clean' ? 'bg-green-400' :
+                          analysis.status === 'suspicious' ? 'bg-amber-400' : 'bg-red-400'
+                        }`}></span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Hex Payload Preview */}
+              <div>
+                <h4 className="text-emerald-400 text-sm font-medium mb-3 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
+                  Payload Preview (Hex)
+                </h4>
+                <div className="bg-black rounded-lg p-3 font-mono text-xs text-green-400 leading-relaxed">
+                  {Array.from({ length: 4 }, () =>
+                    Array.from({ length: 16 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join(' ')
+                  ).join('\n')}
+                </div>
+              </div>
+
+              {/* Verdict */}
+              <div className={`rounded-lg p-4 border ${
+                selectedPacket.status === 'normal' ? 'bg-green-500/5 border-green-500/20' :
+                selectedPacket.status === 'suspicious' ? 'bg-amber-500/5 border-amber-500/20' :
+                'bg-red-500/10 border-red-500/20'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className={`font-medium text-sm ${
+                      selectedPacket.status === 'normal' ? 'text-green-400' :
+                      selectedPacket.status === 'suspicious' ? 'text-amber-400' : 'text-red-400'
+                    }`}>
+                      Verdict: {selectedPacket.status.toUpperCase()}
+                    </p>
+                    <p className="text-gray-400 text-xs mt-1">
+                      {selectedPacket.status === 'normal' ? 'Packet passed all inspection checks - allowed through' :
+                       selectedPacket.status === 'suspicious' ? 'Packet flagged for further investigation - logged for review' :
+                       'Packet matched threat signature - blocked and alert generated'}
+                    </p>
+                  </div>
+                  <span className={`text-2xl ${
+                    selectedPacket.status === 'normal' ? '🟢' :
+                    selectedPacket.status === 'suspicious' ? '🟡' : '🔴'
+                  }`}>
+                    {selectedPacket.status === 'normal' ? '✓' : selectedPacket.status === 'suspicious' ? '⚠' : '✗'}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="p-4 border-t border-gray-700">
+              <button
+                onClick={() => setSelectedPacket(null)}
+                className="w-full py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm"
+              >
+                Close Inspection
+              </button>
+            </div>
           </div>
         </div>
       )}

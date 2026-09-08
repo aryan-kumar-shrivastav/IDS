@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Activity,
+  Eye,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -19,6 +20,7 @@ interface SidebarProps {
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { id: 'live', label: 'Live Analysis', icon: Eye },
   { id: 'network', label: 'Network Monitor', icon: Network },
   { id: 'threats', label: 'Threat Detection', icon: AlertTriangle },
   { id: 'alerts', label: 'Alert Manager', icon: Bell },
